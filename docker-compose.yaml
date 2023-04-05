@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  db:
+    image: 'postgres:14'
+    ports:
+      - "8433:5432"
+    environment:
+      PGPASSWORD: 'password'
+      POSTGRES_DB: 'immersion-db'
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'password'
+    volumes:
+      - 'immersion-go-pgsql:/var/lib/postgresql/data'
+#      - './docker/db_preload.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+    networks:
+      - immersion-go-net
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "immersion-db", "-U", "postgres" ]
+      retries: 3
+      timeout: 5s
+  redis:
+    image: redis:latest
+    ports:
+      - "8379:6379"
+    networks:
+      - immersion-go-net
+    volumes:
+      - immersion-go-redis:/data
+networks:
+  immersion-go-net:
+    driver: bridge
+volumes:
+  immersion-go-pgsql:
+    driver: local
+  immersion-go-redis:
